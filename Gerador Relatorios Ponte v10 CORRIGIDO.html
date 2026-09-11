@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Gerador de Relatório Técnico - Ponte Salvador-Itaparica (V10 - Super iOS)</title>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Open+Sans:wght@400;600&display=swap');
+
+    :root {
+        --bahia-blue: #003882;
+        --bahia-red: #cc0000;
+        --bahia-white: #ffffff;
+        --bg-color: #f0f2f5;
+        --text-dark: #2c3e50;
+        --border-color: #cbd5e1;
+    }
+
+    * { box-sizing: border-box; }
+
+    body { 
+        font-family: 'Open Sans', sans-serif; 
+        margin: 0; 
+        background: var(--bg-color); 
+        color: var(--text-dark); 
+        -webkit-text-size-adjust: 100%; 
+    }
+
+    .bahia-bar {
+        height: 8px;
+        width: 100%;
+        background: linear-gradient(90deg, var(--bahia-blue) 33.3%, var(--bahia-white) 33.3%, var(--bahia-white) 66.6%, var(--bahia-red) 66.6%);
+        display: block;
+    }
+
+    .container { 
+        max-width: 1000px; 
+        background: #fff; 
+        padding: 30px 20px; 
+        margin: 20px auto; 
+        border-radius: 10px; 
+        box-shadow: 0 10px 25px rgba(0,0,0,0.05); 
+    }
+    
+    .app-header { text-align: center; margin-bottom: 25px; }
+    .app-header h2 { color: var(--bahia-blue); font-family: 'Montserrat', sans-serif; font-weight: 700; text-transform: uppercase; margin: 0; font-size: 22px; }
+    .app-header p { color: #64748b; margin-top: 5px; font-size: 14px; }
+
+    .form-group { margin-bottom: 20px; }
+    .form-row { display: flex; gap: 15px; flex-wrap: wrap; }
+    .form-row .form-group { flex: 1; min-width: 250px; }
+    
+    label { font-weight: 600; display: block; margin-bottom: 8px; font-size: 13px; color: #475569; text-transform: uppercase; letter-spacing: 0.5px; }
+    
+    input[type="text"], input[type="date"], input[type="number"], select, textarea { 
+        width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 6px; 
+        font-size: 16px !important; /* 16px é obrigatório no iOS para evitar zoom indesejado */
+        font-family: 'Open Sans', sans-serif; background-color: #f8fafc;
+        -webkit-appearance: none;
+    }
+    textarea { resize: vertical; }
+    
+    .checkbox-group { 
+        display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; 
+        background: #f8fafc; padding: 15px; border-radius: 6px; border: 1px solid var(--border-color); 
+    }
+    .checkbox-group label { font-weight: 400; text-transform: none; font-size: 14px; margin: 0; cursor: pointer; display: flex; align-items: center; }
+    .checkbox-group input[type="checkbox"] { margin-right: 10px; width: 20px; height: 20px; } /* Checkbox maior para toque */
+    
+    .hidden { display: none !important; }
+    
+    .btn-submit { 
+        background: var(--bahia-blue); color: white; border: none; padding: 15px 30px; 
+        cursor: pointer; border-radius: 6px; font-size: 16px; font-weight: bold; font-family: 'Montserrat', sans-serif;
+        width: 100%; text-transform: uppercase; letter-spacing: 1px; margin-top: 20px;
+        -webkit-appearance: none;
+    }
+
+    .btn-dictate {
+        background-color: #e2e8f0; color: #334155; border: 1px solid #cbd5e1; padding: 8px 12px;
+        border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold; transition: all 0.2s ease;
+        display: inline-flex; align-items: center; gap: 5px; -webkit-appearance: none;
+    }
+    .btn-dictate:hover { background-color: #cbd5e1; }
+    .btn-dictate.recording { background-color: var(--bahia-red); color: white; border-color: var(--bahia-red); animation: pulse 1.5s infinite; }
+    
+    @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
+    
+    .flex-label-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 5px; }
+    .flex-label-header label { margin-bottom: 0; }
+    
+    .photo-upload-box { background: #e2e8f0; padding: 20px; border-radius: 8px; text-align: center; border: 2px dashed #94a3b8; margin-bottom: 20px; }
+    #photo-preview { display: flex; flex-direction: column; gap: 15px; margin-top: 15px; }
+    .photo-item { background: #fff; padding: 15px; border-radius: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: flex; flex-direction: column; align-items: center; border: 1px solid #ddd; }
+    .photo-item img { width: 100%; max-width: 300px; height: auto; max-height: 200px; object-fit: contain; border-radius: 4px; margin-bottom: 12px; border: 1px solid #eee; }
+    .photo-item input { font-size: 16px; padding: 12px; width: 100%; box-sizing: border-box; border: 2px solid var(--bahia-blue); border-radius: 6px; background-color: #fff; }
+
+    .ios-notice { font-size: 12px; color: var(--bahia-blue); display: block; margin-top: 4px; font-weight: normal; text-transform: none; }
+
+    /* ===== ESTILOS DE IMPRESSÃO (PDF) ===== */
+    @media print {
+        @page { size: A4; margin: 0; }
+        body { background: #fff; margin: 0; padding: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; font-family: 'Open Sans', sans-serif; }
+        .container, .bahia-bar { display: none !important; } 
+        .print-only { display: block !important; }
+        
+        .report-page { 
+            width: 210mm; height: 297mm; padding: 15mm; box-sizing: border-box; position: relative;
+            page-break-after: always; display: flex; flex-direction: column; background-color: #fff; overflow: hidden;
+        }
+        
+        .report-page::before {
+            content: ""; position: absolute; top: 10mm; bottom: 10mm; left: 10mm; right: 10mm;
+            border: 1px solid #333; pointer-events: none; z-index: 10;
+        }
+
+        .report-header { 
+            display: grid; grid-template-columns: 80px 1fr 80px; align-items: center; gap: 10px;
+            border-bottom: 3px solid var(--bahia-blue); padding-bottom: 10px; margin-bottom: 15px; width: 100%;
+        }
+        
+        .logo-gov { width: 80px; }
+        .logo-obra img { width: 100%; max-height: 65px; object-fit: contain; border-radius: 4px; border: 1px solid #eee; }
+        
+        .header-titles { text-align: center; }
+        .header-titles h1 { font-family: 'Montserrat', sans-serif; font-size: 13pt; color: #000; margin: 0; text-transform: uppercase; letter-spacing: 1px; }
+        .header-titles h2 { font-family: 'Montserrat', sans-serif; font-size: 11pt; color: var(--bahia-blue); margin: 4px 0; }
+        .header-titles h3 { font-size: 9pt; color: #555; margin: 0; font-weight: 600; }
+        
+        .report-content { flex-grow: 1; font-size: 10pt; display: flex; flex-direction: column; }
+        
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 15px; }
+        .info-box { border: 1px solid var(--border-color); padding: 8px 10px; border-radius: 4px; background: #f8fafc; }
+        .info-box.full-width { grid-column: 1 / -1; }
+        .info-box strong { color: var(--bahia-blue); display: block; font-size: 8pt; text-transform: uppercase; margin-bottom: 2px; }
+        .info-box span { color: #000; font-size: 10pt; font-weight: 600; }
+
+        .text-section { margin-top: 10px; display: flex; flex-direction: column; flex-grow: 1; }
+        .text-section h4 { 
+            color: var(--bahia-white); background: var(--bahia-blue); margin: 0; padding: 6px 10px; 
+            font-size: 9pt; font-family: 'Montserrat', sans-serif; border-radius: 4px 4px 0 0;
+        }
+        .text-content { 
+            border: 1px solid var(--bahia-blue); border-top: none; padding: 10px; flex-grow: 1;
+            font-size: 10pt; white-space: pre-wrap; background: #fff; border-radius: 0 0 4px 4px;
+        }
+        
+        .text-section.alert { flex-grow: 0; margin-bottom: 15px; }
+        .text-section.alert h4 { background: var(--bahia-red); }
+        .text-section.alert .text-content { border-color: var(--bahia-red); background: #fffcfc; min-height: 60px; }
+
+        .photo-page-content { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; gap: 20px; padding: 10px 0 25px 0; }
+        .print-photo-item { 
+            text-align: center; height: 45%; display: flex; flex-direction: column; align-items: center; justify-content: center; 
+            background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px;
+        }
+        .print-photo-item img { max-width: 95%; max-height: 80%; object-fit: contain; border: 1px solid #ccc; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .print-photo-item p { 
+            margin-top: 10px; font-family: 'Montserrat', sans-serif; font-size: 9pt; font-weight: 600; color: var(--bahia-blue); 
+            background: #fff; padding: 4px 15px; border-radius: 20px; border: 1px solid var(--border-color);
+        }
+        
+        .print-footer {
+            position: absolute; bottom: 12mm; left: 15mm; right: 15mm; text-align: center; font-size: 8pt; 
+            color: #7f8c8d; border-top: 1px solid #eee; padding-top: 5px; z-index: 20; background: #fff;
+        }
+    }
+    .print-only { display: none; }
+</style>
+</head>
+<body>
+
+<div class="bahia-bar no-print"></div>
+
+<div class="container no-print">
+    <div class="app-header">
+        <h2>Gerador de Informativo (V10)</h2>
+        <p>100% Otimizado para iPhone / iOS</p>
+    </div>
+
+    <form id="reportForm">
+        <div class="form-row">
+            <div class="form-group">
+                <label>Data da Visita</label>
+                <input type="date" id="data" required>
+            </div>
+            <div class="form-group">
+                <label>Responsável pela elaboração</label>
+                <select id="responsavel" required>
+                    <option value="">Selecione o engenheiro/fiscal...</option>
+                    <option value="Ricardo Miranda">Ricardo Miranda</option>
+                    <option value="Marcus Alvares">Marcus Alvares</option>
+                    <option value="Emerson Cardoso">Emerson Cardoso</option>
+                    <option value="Ricardo Cabral">Ricardo Cabral</option>
+                    <option value="Henrique Santana">Henrique Santana</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Local da visita</label>
+                <select id="local" onchange="toggleOutros('local', 'localOutros')" required>
+                    <option value="">Selecione o local...</option>
+                    <option value="Maragogipe">Maragogipe</option>
+                    <option value="Salvador">Salvador</option>
+                    <option value="Vera Cruz">Vera Cruz</option>
+                    <option value="Vão Central">Vão Central</option>
+                    <option value="Outros">Outros</option>
+                </select>
+                <input type="text" id="localOutros" class="hidden" placeholder="Especifique o local..." style="margin-top:10px;">
+            </div>
+            <div class="form-group">
+                <label>Etapa Vistoriada</label>
+                <select id="etapa" onchange="toggleOutros('etapa', 'etapaOutros')" required>
+                    <option value="">Selecione a etapa...</option>
+                    <option value="Sistema Viário Salvador">Sistema Viário Salvador</option>
+                    <option value="Sistema Viário Veracruz">Sistema Viário Veracruz</option>
+                    <option value="Canteiro de Obras Salvador">Canteiro de Obras Salvador</option>
+                    <option value="Canteiro de Obras Veracruz">Canteiro de Obras Veracruz</option>
+                    <option value="PLP Salvador">PLP Salvador</option>
+                    <option value="PLP Veracruz">PLP Veracruz</option>
+                    <option value="Vão Central">Vão Central</option>
+                    <option value="Outros">Outros</option>
+                </select>
+                <input type="text" id="etapaOutros" class="hidden" placeholder="Especifique a etapa..." style="margin-top:10px;">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Condições Climáticas</label>
+                <select id="clima">
+                    <option value="">Selecione...</option>
+                    <option value="Ensolarado / Tempo Bom">Ensolarado / Tempo Bom</option>
+                    <option value="Nublado">Nublado</option>
+                    <option value="Chuvoso">Chuvoso</option>
+                    <option value="Ventos Fortes">Ventos Fortes</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Status do Cronograma</label>
+                <select id="cronograma">
+                    <option value="">Selecione...</option>
+                    <option value="Serviços no Prazo">Serviços no Prazo</option>
+                    <option value="Serviços Adiantados">Serviços Adiantados</option>
+                    <option value="Serviços Atrasados">Serviços Atrasados</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Efetivo Presente (Qtd)</label>
+                <input type="number" id="efetivo" min="0" placeholder="Ex: 45">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Frente de Serviço em execução</label>
+            <div class="checkbox-group">
+                <label><input type="checkbox" name="frente" value="Cravação de Estacas PLP"> Cravação de Estacas PLP</label>
+                <label><input type="checkbox" name="frente" value="Cravação de Estacas Ponte"> Cravação de Estacas Ponte</label>
+                <label><input type="checkbox" name="frente" value="Armação de Estacas"> Armação de Estacas</label>
+                <label><input type="checkbox" name="frente" value="Concretagem de Estacas PLP"> Concretagem de Estacas PLP</label>
+                <label><input type="checkbox" name="frente" value="Concretagem de Estacas Ponte"> Concretagem de Estacas Ponte</label>
+                <label><input type="checkbox" name="frente" value="Confecção de Camisas Metálicas PLP"> Confecção de Camisas Metálicas PLP</label>
+                <label><input type="checkbox" name="frente" value="Confecção de Camisas Metálicas Ponte"> Confecção de Camisas Metálicas Ponte</label>
+                <label><input type="checkbox" name="frente" value="Posicionamento de Vigas de Distribuição"> Posicionamento de Vigas de Distribuição</label>
+                <label><input type="checkbox" name="frente" value="Posicionamento de Vigas Bailey"> Posicionamento de Vigas Bailey</label>
+                <label><input type="checkbox" name="frente" value="Posicionamento de Lajes PLP"> Posicionamento de Lajes PLP</label>
+                <label><input type="checkbox" name="frente" value="Posicionamento de Vigas"> Posicionamento de Vigas</label>
+                <label><input type="checkbox" name="frente" value="Montagem de Guarda Corpo PLP"> Montagem de Guarda Corpo PLP</label>
+                
+                <label style="display: flex; gap: 5px;">
+                    <input type="checkbox" id="frenteOutrasCheckbox" value="Outras" onchange="toggleFrenteOutras()"> Outras:
+                    <input type="text" id="frenteOutrasText" class="hidden" placeholder="Especifique..." style="padding: 4px; width: 160px;">
+                </label>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="flex-label-header">
+                <label>
+                    Descritivo Geral da Visita
+                    <span class="ios-notice">📱 iPhone: Toque na caixa e use o MICROFONE do teclado Apple!</span>
+                </label>
+                <button type="button" class="btn-dictate" id="btn-dictate-descritivo" onclick="toggleDictation('descritivo', this)">🎤 Iniciar Ditado (PC/Android)</button>
+            </div>
+            <textarea id="descritivo" rows="5" placeholder="Descreva os detalhes da visita..."></textarea>
+        </div>
+
+        <div class="form-group">
+            <div class="flex-label-header">
+                <label style="color: var(--bahia-red);">
+                    Avisos / Não Conformidades (SSMA / Qualidade)
+                    <span class="ios-notice">📱 iPhone: Toque na caixa e use o MICROFONE do teclado Apple!</span>
+                </label>
+                <button type="button" class="btn-dictate" id="btn-dictate-avisos" onclick="toggleDictation('avisos', this)">🎤 Iniciar Ditado (PC/Android)</button>
+            </div>
+            <textarea id="avisos" rows="3" placeholder="Registre desvios ou incidentes (Se houver)..."></textarea>
+        </div>
+
+        <div class="photo-upload-box">
+            <label style="font-size: 15px; color: var(--bahia-blue);">📸 Anexar Registros Fotográficos (Máx. 10 fotos)</label>
+            <p style="font-size: 12px; color: #666; margin-top: 0;">As fotos serão processadas para evitar travamentos no seu celular.</p>
+            <input type="file" id="fotos" accept="image/*" multiple onchange="handlePhotos(event)" style="background: transparent; border: none; width: 100%;">
+            <div id="photo-preview"></div>
+        </div>
+
+        <button type="button" class="btn-submit" onclick="gerarRelatorio()">Gerar Relatório Oficial (PDF)</button>
+    </form>
+</div>
+
+<!-- Área de Impressão -->
+<div id="printArea" class="print-only"></div>
+
+<script>
+    const LOGO_BAHIA_URL = "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Bras%C3%A3o_do_estado_da_Bahia.svg/200px-Bras%C3%A3o_do_estado_da_Bahia.svg.png";
+
+    // === LÓGICA DO DITADO POR VOZ ===
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let recognition;
+    let isRecording = false;
+    let currentTextAreaId = null;
+    let currentButton = null;
+
+    if (SpeechRecognition) {
+        recognition = new SpeechRecognition();
+        recognition.continuous = true;
+        recognition.interimResults = true;
+        recognition.lang = 'pt-BR'; 
+
+        recognition.onresult = (event) => {
+            let finalTranscript = '';
+            for (let i = event.resultIndex; i < event.results.length; ++i) {
+                if (event.results[i].isFinal) {
+                    finalTranscript += event.results[i][0].transcript + ' ';
+                }
+            }
+            if (finalTranscript !== '') {
+                const textArea = document.getElementById(currentTextAreaId);
+                textArea.value = (textArea.value + ' ' + finalTranscript).trim();
+            }
+        };
+
+        recognition.onerror = (event) => { stopDictation(); };
+        recognition.onend = () => { if (isRecording) { stopDictation(); } };
+    }
+
+    function toggleDictation(textAreaId, buttonElement) {
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+        if (!SpeechRecognition || isIOS) {
+            alert("No iPhone, a Apple bloqueia botões externos de microfone por segurança.\n\n✅ PARA RESOLVER: Toque dentro da caixa de texto e pressione a tecla do MICROFONE no próprio teclado do seu iPhone! A digitação por voz nativa funcionará perfeitamente.");
+            return;
+        }
+
+        if (isRecording && currentTextAreaId === textAreaId) {
+            stopDictation();
+            return;
+        }
+        if (isRecording) { stopDictation(); }
+
+        currentTextAreaId = textAreaId;
+        currentButton = buttonElement;
+        isRecording = true;
+        
+        try {
+            recognition.start();
+            buttonElement.classList.add('recording');
+            buttonElement.innerHTML = '🛑 Parar Ditado';
+        } catch(e) {
+            stopDictation();
+        }
+    }
+
+    function stopDictation() {
+        if (recognition) { try { recognition.stop(); } catch(e) {} }
+        isRecording = false;
+        if (currentButton) {
+            currentButton.classList.remove('recording');
+            currentButton.innerHTML = '🎤 Iniciar Ditado (PC/Android)';
+        }
+        currentTextAreaId = null;
+        currentButton = null;
+    }
+
+
+    let photoData = [];
+
+    function toggleOutros(selectId, inputId) {
+        const select = document.getElementById(selectId);
+        const input = document.getElementById(inputId);
+        if (select.value === 'Outros') {
+            input.classList.remove('hidden');
+        } else {
+            input.classList.add('hidden');
+            input.value = '';
+        }
+    }
+
+    function toggleFrenteOutras() {
+        const checkbox = document.getElementById('frenteOutrasCheckbox');
+        const textInput = document.getElementById('frenteOutrasText');
+        if (checkbox.checked) {
+            textInput.classList.remove('hidden');
+            textInput.focus();
+        } else {
+            textInput.classList.add('hidden');
+            textInput.value = '';
+        }
+    }
+
+    // LÓGICA DE FOTOS OTIMIZADA (CANVAS COMPRESSOR PARA EVITAR TRAVAMENTO NO IOS)
+    function handlePhotos(event) {
+        const files = Array.from(event.target.files).slice(0, 10);
+        const preview = document.getElementById('photo-preview');
+        preview.innerHTML = '';
+        photoData = [];
+
+        files.forEach((file, index) => {
+            // Inicializa array para manter a ordem enquanto carrega async
+            photoData[index] = { src: '', legend: '' };
+
+            const img = new Image();
+            const objectUrl = URL.createObjectURL(file);
+            
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                const MAX_WIDTH = 800; // Reduz as fotos gigantes da Apple para max 800px
+                const MAX_HEIGHT = 800;
+                let width = img.width;
+                let height = img.height;
+
+                if (width > height) {
+                    if (width > MAX_WIDTH) {
+                        height = Math.round(height * MAX_WIDTH / width);
+                        width = MAX_WIDTH;
+                    }
+                } else {
+                    if (height > MAX_HEIGHT) {
+                        width = Math.round(width * MAX_HEIGHT / height);
+                        height = MAX_HEIGHT;
+                    }
+                }
+                
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+                
+                // Converte a imagem para uma string base64 super leve
+                const dataUrl = canvas.toDataURL('image/jpeg', 0.6); 
+                photoData[index].src = dataUrl;
+
+                const div = document.createElement('div');
+                div.className = 'photo-item';
+                div.innerHTML = `
+                    <img src="${dataUrl}" alt="Foto ${index + 1}">
+                    <input type="text" placeholder="Tocar aqui para inserir a legenda ${index + 1}..." oninput="updateLegend(${index}, this.value)">
+                `;
+                preview.appendChild(div);
+                
+                URL.revokeObjectURL(objectUrl); // Libera memória vital do iPhone instantaneamente
+            }
+
+            img.onerror = function() {
+                // Evita falha silenciosa (ex: formatos não suportados) - garante feedback ao usuário
+                URL.revokeObjectURL(objectUrl);
+                const div = document.createElement('div');
+                div.className = 'photo-item';
+                div.innerHTML = `
+                    <p style="color: var(--bahia-red); font-weight: 600;">⚠️ Não foi possível carregar esta foto (formato não suportado). Tente novamente ou escolha outra imagem.</p>
+                `;
+                preview.appendChild(div);
+            };
+
+            img.src = objectUrl;
+        });
+    }
+
+    function updateLegend(index, value) {
+        if(photoData[index]) {
+            photoData[index].legend = value;
+        }
+    }
+
+    function formatData(data) {
+        if(!data) return '';
+        const [ano, mes, dia] = data.split('-');
+        return `${dia}/${mes}/${ano}`;
+    }
+
+    function gerarRelatorio() {
+        if(isRecording) stopDictation();
+
+        const data = formatData(document.getElementById('data').value);
+        const resp = document.getElementById('responsavel').value;
+        const local = document.getElementById('local').value === 'Outros' ? document.getElementById('localOutros').value : document.getElementById('local').value;
+        const etapa = document.getElementById('etapa').value === 'Outros' ? document.getElementById('etapaOutros').value : document.getElementById('etapa').value;
+        
+        const clima = document.getElementById('clima').value || 'Não informado';
+        const cronograma = document.getElementById('cronograma').value || 'Não avaliado';
+        const efetivo = document.getElementById('efetivo').value || 'N/A';
+        
+        const descritivo = document.getElementById('descritivo').value || 'Sem descrição inserida.';
+        const avisos = document.getElementById('avisos').value || 'Nenhuma não conformidade ou aviso registrado durante a visita.';
+        
+        const frentesCheckboxes = Array.from(document.querySelectorAll('input[name="frente"]:checked'));
+        let frentesArray = frentesCheckboxes.map(cb => cb.value).filter(val => val !== 'Outras');
+        
+        if (document.getElementById('frenteOutrasCheckbox').checked) {
+            const outrasVal = document.getElementById('frenteOutrasText').value;
+            if (outrasVal) { frentesArray.push(outrasVal); }
+        }
+        const frentes = frentesArray.join(' • ');
+
+        if(!document.getElementById('data').value || !resp || !document.getElementById('local').value || !document.getElementById('etapa').value) {
+            alert("Por favor, preencha os campos obrigatórios (Data, Responsável, Local e Etapa).");
+            return;
+        }
+
+        const cabecalhoHTML = `
+            <div class="report-header">
+                <div class="logo-gov"></div>
+                <div class="header-titles">
+                    <h1>DIRETORIA DE ENGENHARIA</h1>
+                    <h2>INFORMATIVO DE VISITA TÉCNICA</h2>
+                    <h3>OBRA: PONTA SALVADOR - ITAPARICA</h3>
+                </div>
+                <div class="logo-obra">
+                    <img src="${LOGO_BAHIA_URL}" alt="Governo da Bahia">
+                </div>
+            </div>
+        `;
+        
+        const footerHTML = `<div class="print-footer">Documento gerado pelo Sistema de Acompanhamento de Obras - Governo da Bahia</div>`;
+
+        let html = `
+        <div class="report-page">
+            ${cabecalhoHTML}
+            <div class="report-content">
+                <div class="info-grid">
+                    <div class="info-box"><strong>Data da Vistoria</strong><span>${data}</span></div>
+                    <div class="info-box"><strong>Responsável Técnico</strong><span>${resp}</span></div>
+                    
+                    <div class="info-box"><strong>Local da Visita</strong><span>${local}</span></div>
+                    <div class="info-box"><strong>Etapa Vistoriada</strong><span>${etapa}</span></div>
+                    
+                    <div class="info-box"><strong>Condições Climáticas</strong><span>${clima}</span></div>
+                    <div class="info-box" style="display:flex; justify-content: space-between;">
+                        <div><strong>Cronograma</strong><span>${cronograma}</span></div>
+                        <div style="border-left: 1px solid #ccc; padding-left: 15px;"><strong>Efetivo</strong><span>${efetivo} func.</span></div>
+                    </div>
+                    <div class="info-box full-width"><strong>Frentes de Serviço em Execução</strong><span>${frentes || 'Nenhuma frente específica selecionada.'}</span></div>
+                </div>
+
+                <div class="text-section">
+                    <h4>DESCRITIVO GERAL DOS SERVIÇOS</h4>
+                    <div class="text-content">${descritivo}</div>
+                </div>
+                
+                <div class="text-section alert">
+                    <h4>AVISOS / NÃO CONFORMIDADES / SSMA</h4>
+                    <div class="text-content">${avisos}</div>
+                </div>
+            </div>
+            ${footerHTML}
+        </div>`;
+
+        // Filtra fotos que realmente foram processadas com sucesso e geram páginas
+        const validPhotos = photoData.filter(p => p && p.src !== '');
+
+        for(let i = 0; i < validPhotos.length; i += 2) {
+            html += `
+            <div class="report-page">
+                ${cabecalhoHTML}
+                <div class="photo-page-content">
+                    <div class="print-photo-item">
+                        <img src="${validPhotos[i].src}">
+                        <p>${validPhotos[i].legend || 'Registro Fotográfico ' + (i+1)}</p>
+                    </div>`;
+            
+            if (validPhotos[i+1]) {
+                html += `
+                    <div class="print-photo-item">
+                        <img src="${validPhotos[i+1].src}">
+                        <p>${validPhotos[i+1].legend || 'Registro Fotográfico ' + (i+2)}</p>
+                    </div>`;
+            }
+            
+            html += `
+                </div>
+                ${footerHTML}
+            </div>`;
+        }
+
+        // Execução Síncrona da Impressão (Resolve bloqueio do iPhone)
+        document.getElementById('printArea').innerHTML = html;
+        window.print();
+    }
+</script>
+</body>
+</html>
