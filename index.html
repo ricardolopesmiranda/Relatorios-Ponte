@@ -115,17 +115,22 @@
         }
 
         .report-header { 
-            display: grid; grid-template-columns: 80px 1fr 80px; align-items: center; gap: 10px;
-            border-bottom: 3px solid var(--bahia-blue); padding-bottom: 10px; margin-bottom: 15px; width: 100%;
+            display: grid; grid-template-columns: 70px 1fr 70px; align-items: center; gap: 12px;
+            background: var(--bahia-blue); border-radius: 6px 6px 0 0; padding: 8px 14px; margin-bottom: 15px; width: 100%;
+            position: relative;
         }
-        
-        .logo-gov { width: 80px; }
-        .logo-obra img { width: 100%; max-height: 65px; object-fit: contain; border-radius: 4px; border: 1px solid #eee; }
+        .report-header::after {
+            content: ""; display: block; position: absolute; left: 0; right: 0; bottom: -4px; height: 4px;
+            background: linear-gradient(90deg, var(--bahia-blue) 33.3%, var(--bahia-white) 33.3%, var(--bahia-white) 66.6%, var(--bahia-red) 66.6%);
+        }
+
+        .logo-gov, .logo-obra { width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; }
+        .logo-gov svg, .logo-obra svg { width: 100%; height: 100%; }
         
         .header-titles { text-align: center; }
-        .header-titles h1 { font-family: 'Montserrat', sans-serif; font-size: 13pt; color: #000; margin: 0; text-transform: uppercase; letter-spacing: 1px; }
-        .header-titles h2 { font-family: 'Montserrat', sans-serif; font-size: 11pt; color: var(--bahia-blue); margin: 4px 0; }
-        .header-titles h3 { font-size: 9pt; color: #555; margin: 0; font-weight: 600; }
+        .header-titles h1 { font-family: 'Montserrat', sans-serif; font-size: 12.5pt; color: #fff; margin: 0; text-transform: uppercase; letter-spacing: 1.5px; }
+        .header-titles h2 { font-family: 'Montserrat', sans-serif; font-size: 10.5pt; color: var(--bahia-white); margin: 3px 0; opacity: 0.95; }
+        .header-titles h3 { font-size: 8.5pt; color: #cfe0f5; margin: 0; font-weight: 600; letter-spacing: 0.5px; }
         
         .report-content { flex-grow: 1; font-size: 10pt; display: flex; flex-direction: column; }
         
@@ -149,14 +154,19 @@
         .text-section.alert h4 { background: var(--bahia-red); }
         .text-section.alert .text-content { border-color: var(--bahia-red); background: #fffcfc; min-height: 60px; }
 
-        .photo-page-content { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; gap: 20px; padding: 10px 0 25px 0; }
+        /* Layout de fotos com alturas fixas (mm) - evita que o conteúdo ultrapasse a página impressa */
+        .photo-page-content { display: grid; grid-template-rows: 107mm 107mm; gap: 8mm; margin-top: 8mm; }
         .print-photo-item { 
-            text-align: center; height: 45%; display: flex; flex-direction: column; align-items: center; justify-content: center; 
-            background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px;
+            box-sizing: border-box; height: 107mm; overflow: hidden;
+            display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 6px;
+            background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 6mm;
         }
-        .print-photo-item img { max-width: 95%; max-height: 80%; object-fit: contain; border: 1px solid #ccc; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .print-photo-item img { 
+            flex: 1 1 auto; min-height: 0; max-width: 100%; width: auto;
+            object-fit: contain; border: 1px solid #ccc; box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
         .print-photo-item p { 
-            margin-top: 10px; font-family: 'Montserrat', sans-serif; font-size: 9pt; font-weight: 600; color: var(--bahia-blue); 
+            flex: 0 0 auto; margin: 0; font-family: 'Montserrat', sans-serif; font-size: 9pt; font-weight: 600; color: var(--bahia-blue); 
             background: #fff; padding: 4px 15px; border-radius: 20px; border: 1px solid var(--border-color);
         }
         
@@ -313,7 +323,7 @@
 <div id="printArea" class="print-only"></div>
 
 <script>
-    const LOGO_BAHIA_URL = "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Bras%C3%A3o_do_estado_da_Bahia.svg/200px-Bras%C3%A3o_do_estado_da_Bahia.svg.png";
+    // Identidade visual (brasão e ícone de ponte) agora embutida via SVG direto no HTML - não depende mais de internet
 
     // === LÓGICA DO DITADO POR VOZ ===
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -520,14 +530,30 @@
 
         const cabecalhoHTML = `
             <div class="report-header">
-                <div class="logo-gov"></div>
+                <div class="logo-gov">
+                    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="50" cy="50" r="46" fill="none" stroke="#ffffff" stroke-width="4"/>
+                        <circle cx="50" cy="50" r="36" fill="none" stroke="#ffffff" stroke-width="1.5"/>
+                        <path d="M50 20 L58 42 L82 42 L62 56 L70 78 L50 64 L30 78 L38 56 L18 42 L42 42 Z" fill="#ffffff"/>
+                    </svg>
+                </div>
                 <div class="header-titles">
                     <h1>DIRETORIA DE ENGENHARIA</h1>
                     <h2>INFORMATIVO DE VISITA TÉCNICA</h2>
-                    <h3>OBRA: PONTA SALVADOR - ITAPARICA</h3>
+                    <h3>OBRA: PONTE SALVADOR - ITAPARICA</h3>
                 </div>
                 <div class="logo-obra">
-                    <img src="${LOGO_BAHIA_URL}" alt="Governo da Bahia">
+                    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                        <line x1="50" y1="8" x2="8" y2="62" stroke="#ffffff" stroke-width="3"/>
+                        <line x1="50" y1="8" x2="30" y2="62" stroke="#ffffff" stroke-width="3"/>
+                        <line x1="50" y1="8" x2="50" y2="62" stroke="#ffffff" stroke-width="3"/>
+                        <line x1="50" y1="8" x2="70" y2="62" stroke="#ffffff" stroke-width="3"/>
+                        <line x1="50" y1="8" x2="92" y2="62" stroke="#ffffff" stroke-width="3"/>
+                        <rect x="4" y="62" width="92" height="6" fill="#ffffff"/>
+                        <rect x="47" y="8" width="6" height="6" fill="#ffffff"/>
+                        <rect x="10" y="68" width="4" height="10" fill="#ffffff"/>
+                        <rect x="86" y="68" width="4" height="10" fill="#ffffff"/>
+                    </svg>
                 </div>
             </div>
         `;
@@ -593,9 +619,18 @@
             </div>`;
         }
 
+        // Sugere um nome de arquivo organizado ao salvar como PDF (usado pelo Safari/iOS na tela de impressão)
+        const tituloOriginal = document.title;
+        const dataArquivo = data.replace(/\//g, '-');
+        const localArquivo = local.replace(/[^a-zA-Z0-9]+/g, '_');
+        document.title = `Relatorio_${dataArquivo}_${localArquivo}`;
+
         // Execução Síncrona da Impressão (Resolve bloqueio do iPhone)
         document.getElementById('printArea').innerHTML = html;
         window.print();
+
+        // Restaura o título original da página após a impressão
+        setTimeout(() => { document.title = tituloOriginal; }, 1000);
     }
 </script>
 </body>
